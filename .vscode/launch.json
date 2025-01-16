@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/sammy/Documents/GitHub/crystals-dilithium",
+      "program": "/Users/sammy/Documents/GitHub/crystals-dilithium/build/Debug/outDebug"
+    }
+  ]
+}
