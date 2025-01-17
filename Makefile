@@ -7,7 +7,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -I./cpp-base64/ -I./asio-1.30.2/include -I./Crow/include -I./liboqs/build/include -I/opt/homebrew/opt/openssl@3/include
 
 # Linker flags
-LDFLAGS = -L./liboqs/build/lib -L/opt/homebrew/opt/openssl@3/lib -loqs -lcrypto
+LDFLAGS = -L./liboqs/build/lib -L/opt/homebrew/opt/openssl@3/lib -loqs -pthread -lcrypto
 
 # Target executable
 TARGET = mlKemAPIDil

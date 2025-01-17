@@ -16,16 +16,16 @@
  */
 #define OQS_VERSION_PRE_RELEASE "-dev"
 
-#define OQS_COMPILE_BUILD_TARGET "arm64-Darwin-23.5.0"
+#define OQS_COMPILE_BUILD_TARGET "x86_64-Linux-6.5.0-1025-azure"
 #define OQS_DIST_BUILD 1
-/* #undef OQS_DIST_X86_64_BUILD */
+#define OQS_DIST_X86_64_BUILD 1
 /* #undef OQS_DIST_X86_BUILD */
-#define OQS_DIST_ARM64_V8_BUILD 1
+/* #undef OQS_DIST_ARM64_V8_BUILD */
 /* #undef OQS_DIST_ARM32_V7_BUILD */
 /* #undef OQS_DIST_PPC64LE_BUILD */
 /* #undef OQS_DEBUG_BUILD */
-/* #undef ARCH_X86_64 */
-#define ARCH_ARM64v8 1
+#define ARCH_X86_64 1
+/* #undef ARCH_ARM64v8 */
 /* #undef ARCH_ARM32v7 */
 /* #undef BUILD_SHARED_LIBS */
 /* #undef OQS_BUILD_ONLY_LIB */
@@ -34,7 +34,7 @@
 /* #undef CMAKE_BUILD_TYPE */
 
 #define OQS_USE_OPENSSL 1
-#define OQS_USE_AES_OPENSSL 1
+/* #undef OQS_USE_AES_OPENSSL */
 #define OQS_USE_SHA2_OPENSSL 1
 /* #undef OQS_USE_SHA3_OPENSSL */
 /* #undef OQS_DLOPEN_OPENSSL */
@@ -67,7 +67,7 @@
 
 /* #undef OQS_ENABLE_TEST_CONSTANT_TIME */
 
-/* #undef OQS_ENABLE_SHA3_xkcp_low_avx2 */
+#define OQS_ENABLE_SHA3_xkcp_low_avx2 1
 
 #define OQS_ENABLE_KEM_BIKE 1
 #define OQS_ENABLE_KEM_bike_l1 1
@@ -84,31 +84,31 @@
 
 #define OQS_ENABLE_KEM_NTRUPRIME 1
 #define OQS_ENABLE_KEM_ntruprime_sntrup761 1
-/* #undef OQS_ENABLE_KEM_ntruprime_sntrup761_avx2 */
+#define OQS_ENABLE_KEM_ntruprime_sntrup761_avx2 1
 
 ///// OQS_COPY_FROM_UPSTREAM_FRAGMENT_ADD_ALG_ENABLE_DEFINES_START
 
 #define OQS_ENABLE_KEM_CLASSIC_MCELIECE 1
 #define OQS_ENABLE_KEM_classic_mceliece_348864 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_348864_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_348864_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_348864f 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_348864f_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_348864f_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_460896 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_460896_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_460896_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_460896f 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_460896f_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_460896f_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_6688128 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_6688128_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_6688128_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_6688128f 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_6688128f_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_6688128f_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_6960119 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_6960119_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_6960119_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_6960119f 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_6960119f_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_6960119f_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_8192128 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_8192128_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_8192128_avx2 1
 #define OQS_ENABLE_KEM_classic_mceliece_8192128f 1
-/* #undef OQS_ENABLE_KEM_classic_mceliece_8192128f_avx2 */
+#define OQS_ENABLE_KEM_classic_mceliece_8192128f_avx2 1
 
 #define OQS_ENABLE_KEM_HQC 1
 #define OQS_ENABLE_KEM_hqc_128 1
@@ -117,129 +117,129 @@
 
 #define OQS_ENABLE_KEM_KYBER 1
 #define OQS_ENABLE_KEM_kyber_512 1
-/* #undef OQS_ENABLE_KEM_kyber_512_avx2 */
-#define OQS_ENABLE_KEM_kyber_512_aarch64 1
+#define OQS_ENABLE_KEM_kyber_512_avx2 1
+/* #undef OQS_ENABLE_KEM_kyber_512_aarch64 */
 #define OQS_ENABLE_KEM_kyber_768 1
-/* #undef OQS_ENABLE_KEM_kyber_768_avx2 */
-#define OQS_ENABLE_KEM_kyber_768_aarch64 1
+#define OQS_ENABLE_KEM_kyber_768_avx2 1
+/* #undef OQS_ENABLE_KEM_kyber_768_aarch64 */
 #define OQS_ENABLE_KEM_kyber_1024 1
-/* #undef OQS_ENABLE_KEM_kyber_1024_avx2 */
-#define OQS_ENABLE_KEM_kyber_1024_aarch64 1
+#define OQS_ENABLE_KEM_kyber_1024_avx2 1
+/* #undef OQS_ENABLE_KEM_kyber_1024_aarch64 */
 
 #define OQS_ENABLE_KEM_ML_KEM 1
 #define OQS_ENABLE_KEM_ml_kem_512 1
-/* #undef OQS_ENABLE_KEM_ml_kem_512_avx2 */
+#define OQS_ENABLE_KEM_ml_kem_512_avx2 1
 #define OQS_ENABLE_KEM_ml_kem_768 1
-/* #undef OQS_ENABLE_KEM_ml_kem_768_avx2 */
+#define OQS_ENABLE_KEM_ml_kem_768_avx2 1
 #define OQS_ENABLE_KEM_ml_kem_1024 1
-/* #undef OQS_ENABLE_KEM_ml_kem_1024_avx2 */
+#define OQS_ENABLE_KEM_ml_kem_1024_avx2 1
 
 #define OQS_ENABLE_SIG_DILITHIUM 1
 #define OQS_ENABLE_SIG_dilithium_2 1
-/* #undef OQS_ENABLE_SIG_dilithium_2_avx2 */
-#define OQS_ENABLE_SIG_dilithium_2_aarch64 1
+#define OQS_ENABLE_SIG_dilithium_2_avx2 1
+/* #undef OQS_ENABLE_SIG_dilithium_2_aarch64 */
 #define OQS_ENABLE_SIG_dilithium_3 1
-/* #undef OQS_ENABLE_SIG_dilithium_3_avx2 */
-#define OQS_ENABLE_SIG_dilithium_3_aarch64 1
+#define OQS_ENABLE_SIG_dilithium_3_avx2 1
+/* #undef OQS_ENABLE_SIG_dilithium_3_aarch64 */
 #define OQS_ENABLE_SIG_dilithium_5 1
-/* #undef OQS_ENABLE_SIG_dilithium_5_avx2 */
-#define OQS_ENABLE_SIG_dilithium_5_aarch64 1
+#define OQS_ENABLE_SIG_dilithium_5_avx2 1
+/* #undef OQS_ENABLE_SIG_dilithium_5_aarch64 */
 
 #define OQS_ENABLE_SIG_ML_DSA 1
 #define OQS_ENABLE_SIG_ml_dsa_44 1
-/* #undef OQS_ENABLE_SIG_ml_dsa_44_avx2 */
+#define OQS_ENABLE_SIG_ml_dsa_44_avx2 1
 #define OQS_ENABLE_SIG_ml_dsa_65 1
-/* #undef OQS_ENABLE_SIG_ml_dsa_65_avx2 */
+#define OQS_ENABLE_SIG_ml_dsa_65_avx2 1
 #define OQS_ENABLE_SIG_ml_dsa_87 1
-/* #undef OQS_ENABLE_SIG_ml_dsa_87_avx2 */
+#define OQS_ENABLE_SIG_ml_dsa_87_avx2 1
 
 #define OQS_ENABLE_SIG_FALCON 1
 #define OQS_ENABLE_SIG_falcon_512 1
-/* #undef OQS_ENABLE_SIG_falcon_512_avx2 */
-#define OQS_ENABLE_SIG_falcon_512_aarch64 1
+#define OQS_ENABLE_SIG_falcon_512_avx2 1
+/* #undef OQS_ENABLE_SIG_falcon_512_aarch64 */
 #define OQS_ENABLE_SIG_falcon_1024 1
-/* #undef OQS_ENABLE_SIG_falcon_1024_avx2 */
-#define OQS_ENABLE_SIG_falcon_1024_aarch64 1
+#define OQS_ENABLE_SIG_falcon_1024_avx2 1
+/* #undef OQS_ENABLE_SIG_falcon_1024_aarch64 */
 #define OQS_ENABLE_SIG_falcon_padded_512 1
-/* #undef OQS_ENABLE_SIG_falcon_padded_512_avx2 */
-#define OQS_ENABLE_SIG_falcon_padded_512_aarch64 1
+#define OQS_ENABLE_SIG_falcon_padded_512_avx2 1
+/* #undef OQS_ENABLE_SIG_falcon_padded_512_aarch64 */
 #define OQS_ENABLE_SIG_falcon_padded_1024 1
-/* #undef OQS_ENABLE_SIG_falcon_padded_1024_avx2 */
-#define OQS_ENABLE_SIG_falcon_padded_1024_aarch64 1
+#define OQS_ENABLE_SIG_falcon_padded_1024_avx2 1
+/* #undef OQS_ENABLE_SIG_falcon_padded_1024_aarch64 */
 
 #define OQS_ENABLE_SIG_SPHINCS 1
 #define OQS_ENABLE_SIG_sphincs_sha2_128f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_128f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_128f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_sha2_128s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_128s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_128s_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_sha2_192f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_192f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_192f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_sha2_192s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_192s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_192s_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_sha2_256f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_256f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_256f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_sha2_256s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_sha2_256s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_sha2_256s_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_128f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_128f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_128f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_128s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_128s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_128s_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_192f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_192f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_192f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_192s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_192s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_192s_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_256f_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_256f_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_256f_simple_avx2 1
 #define OQS_ENABLE_SIG_sphincs_shake_256s_simple 1
-/* #undef OQS_ENABLE_SIG_sphincs_shake_256s_simple_avx2 */
+#define OQS_ENABLE_SIG_sphincs_shake_256s_simple_avx2 1
 
 #define OQS_ENABLE_SIG_MAYO 1
 #define OQS_ENABLE_SIG_mayo_1 1
-/* #undef OQS_ENABLE_SIG_mayo_1_avx2 */
+#define OQS_ENABLE_SIG_mayo_1_avx2 1
 #define OQS_ENABLE_SIG_mayo_2 1
-/* #undef OQS_ENABLE_SIG_mayo_2_avx2 */
+#define OQS_ENABLE_SIG_mayo_2_avx2 1
 #define OQS_ENABLE_SIG_mayo_3 1
-/* #undef OQS_ENABLE_SIG_mayo_3_avx2 */
+#define OQS_ENABLE_SIG_mayo_3_avx2 1
 #define OQS_ENABLE_SIG_mayo_5 1
-/* #undef OQS_ENABLE_SIG_mayo_5_avx2 */
+#define OQS_ENABLE_SIG_mayo_5_avx2 1
 
 #define OQS_ENABLE_SIG_CROSS 1
 #define OQS_ENABLE_SIG_cross_rsdp_128_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_128_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_128_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_128_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_128_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_128_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_128_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_128_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_128_small_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_192_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_192_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_192_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_192_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_192_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_192_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_192_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_192_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_192_small_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_256_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_256_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_256_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_256_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_256_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_256_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdp_256_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdp_256_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdp_256_small_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_128_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_128_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_128_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_128_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_128_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_128_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_128_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_128_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_128_small_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_192_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_192_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_192_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_192_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_192_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_192_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_192_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_192_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_192_small_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_256_balanced 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_256_balanced_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_256_balanced_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_256_fast 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_256_fast_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_256_fast_avx2 1
 #define OQS_ENABLE_SIG_cross_rsdpg_256_small 1
-/* #undef OQS_ENABLE_SIG_cross_rsdpg_256_small_avx2 */
+#define OQS_ENABLE_SIG_cross_rsdpg_256_small_avx2 1
 ///// OQS_COPY_FROM_UPSTREAM_FRAGMENT_ADD_ALG_ENABLE_DEFINES_END
 
 ///// OQS_COPY_FROM_LIBJADE_FRAGMENT_ADD_ALG_ENABLE_DEFINES_START
