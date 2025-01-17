@@ -1,6 +1,0 @@
-[submodule "cpp_base64"]
-	path = cpp_base64
-	url = https://github.com/ReneNyffenegger/cpp-base64.git
-[submodule "crow"]
-	path = crow
-	url = https://github.com/CrowCpp/Crow.git
