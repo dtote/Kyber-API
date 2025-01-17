@@ -248,16 +248,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 template<typename... Args>
                 void set_(Func f, typename std::enable_if<!std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request&>::value, int>::type = 0)
                 {
-                    handler_ = (
-#ifdef CROW_CAN_USE_CPP14
-                      [f = std::move(f)]
-#else
-                      [f]
-#endif
-                      (const request&, response& res, Args... args) {
-                          res = response(f(args...));
-                          res.end();
-                      });
+                    handler_ = ([f = std::move(f)](const request&, response& res, Args... args) {
+                        res = response(f(args...));
+                        res.end();
+                    });
                 }
 
                 template<typename Req, typename... Args>
@@ -354,16 +348,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             static_assert(!std::is_same<void, decltype(f())>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
-            handler_ = (
-#ifdef CROW_CAN_USE_CPP14
-              [f = std::move(f)]
-#else
-              [f]
-#endif
-              (const request&, response& res) {
-                  res = response(f());
-                  res.end();
-              });
+            handler_ = ([f = std::move(f)](const request&, response& res) {
+                res = response(f());
+                res.end();
+            });
         }
 
         template<typename Func>
@@ -376,16 +364,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             static_assert(!std::is_same<void, decltype(f(std::declval<crow::request>()))>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
-            handler_ = (
-#ifdef CROW_CAN_USE_CPP14
-              [f = std::move(f)]
-#else
-              [f]
-#endif
-              (const crow::request& req, crow::response& res) {
-                  res = response(f(req));
-                  res.end();
-              });
+            handler_ = ([f = std::move(f)](const request& req, response& res) {
+                res = response(f(req));
+                res.end();
+            });
         }
 
         template<typename Func>
@@ -398,15 +380,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             static_assert(std::is_same<void, decltype(f(std::declval<crow::response&>()))>::value,
                           "Handler function with response argument should have void return type");
-            handler_ = (
-#ifdef CROW_CAN_USE_CPP14
-              [f = std::move(f)]
-#else
-              [f]
-#endif
-              (const crow::request&, crow::response& res) {
-                  f(res);
-              });
+            handler_ = ([f = std::move(f)](const request&, response& res) {
+                f(res);
+            });
         }
 
         template<typename Func>
@@ -464,12 +440,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         void handle_upgrade(const request& req, response&, SocketAdaptor&& adaptor) override
         {
             max_payload_ = max_payload_override_ ? max_payload_ : app_->websocket_max_payload();
-            new crow::websocket::Connection<SocketAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_);
+            new crow::websocket::Connection<SocketAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_, mirror_protocols_);
         }
 #ifdef CROW_ENABLE_SSL
         void handle_upgrade(const request& req, response&, SSLAdaptor&& adaptor) override
         {
-            new crow::websocket::Connection<SSLAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_);
+            new crow::websocket::Connection<SSLAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_, mirror_protocols_);
         }
 #endif
 
@@ -522,6 +498,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *this;
         }
 
+        self_t& mirrorprotocols(bool mirror_protocols = true)
+        {
+            mirror_protocols_ = mirror_protocols;
+            return *this;
+        }
+
     protected:
         App* app_;
         std::function<void(crow::websocket::connection&)> open_handler_;
@@ -529,6 +511,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         std::function<void(crow::websocket::connection&, const std::string&, uint16_t)> close_handler_;
         std::function<void(crow::websocket::connection&, const std::string&)> error_handler_;
         std::function<bool(const crow::request&, void**)> accept_handler_;
+        bool mirror_protocols_ = false;
         uint64_t max_payload_;
         bool max_payload_override_ = false;
         std::vector<std::string> subprotocols_;
@@ -681,15 +664,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         template<typename Func>
         void operator()(Func&& f)
         {
-            handler_ = (
-#ifdef CROW_CAN_USE_CPP14
-              [f = std::move(f)]
-#else
-              [f]
-#endif
-              (crow::request& req, crow::response& res, Args... args) {
-                  detail::wrapped_handler_call(req, res, f, std::forward<Args>(args)...);
-              });
+            handler_ = ([f = std::move(f)](request& req, response& res, Args... args) {
+                detail::wrapped_handler_call(req, res, f, std::forward<Args>(args)...);
+            });
         }
 
         template<typename Func>

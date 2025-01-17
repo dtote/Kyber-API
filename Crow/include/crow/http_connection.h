@@ -50,7 +50,7 @@ namespace crow
 
     public:
         Connection(
-          asio::io_service& io_service,
+          asio::io_context& io_context,
           Handler* handler,
           const std::string& server_name,
           std::tuple<Middlewares...>* middlewares,
@@ -58,7 +58,7 @@ namespace crow
           detail::task_timer& task_timer,
           typename Adaptor::context* adaptor_ctx_,
           std::atomic<unsigned int>& queue_length):
-          adaptor_(io_service, adaptor_ctx_),
+          adaptor_(io_context, adaptor_ctx_),
           handler_(handler),
           parser_(this),
           req_(parser_.req),
@@ -128,7 +128,7 @@ namespace crow
                 buffers_.clear();
                 static std::string expect_100_continue = "HTTP/1.1 100 Continue\r\n\r\n";
                 buffers_.emplace_back(expect_100_continue.data(), expect_100_continue.size());
-                do_write();
+                do_write_sync(buffers_);
             }
         }
 
@@ -143,7 +143,7 @@ namespace crow
             ctx_ = detail::context<Middlewares...>();
             req_.middleware_context = static_cast<void*>(&ctx_);
             req_.middleware_container = static_cast<void*>(middlewares_);
-            req_.io_service = &adaptor_.get_io_service();
+            req_.io_context = &adaptor_.get_io_context();
 
             req_.remote_ip_address = adaptor_.remote_endpoint().address().to_string();
 
@@ -427,7 +427,7 @@ namespace crow
                 res_body_copy_.swap(res.body);
                 buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
 
-                do_write();
+                do_write_sync(buffers_);
 
                 if (need_to_start_read_after_complete_)
                 {
