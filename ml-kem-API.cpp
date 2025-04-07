@@ -2,8 +2,118 @@
 #include <string>
 #include <cstring>
 #include <oqs/oqs.h>
-#include "crow.h"  // Biblioteca Crow para la API REST
-#include <base64.h>  // Biblioteca de codificación Base64
+#include "crow.h"  // Library Crow to make the API REST
+#include <base64.h>  // Library to encode Base64
+
+// Function to generate keys for ML-DSA (ML-DSA-44, ML-DSA-65, ML-DSA-87)
+std::pair<std::string, std::string> generate_ml_dsa_keys(const std::string &ml_dsa_variant) {
+    // Initialize the ML-DSA algorithm with the specified variant (ML-DSA-44, ML-DSA-65, ML-DSA-87)
+    OQS_SIG *sig = OQS_SIG_new(ml_dsa_variant.c_str());
+    if (!sig) {
+        throw std::runtime_error("Error initializing the ML-DSA algorithm");
+    }
+
+    // Define key lengths for public and private keys
+    size_t public_key_len = sig->length_public_key;
+    size_t private_key_len = sig->length_secret_key;
+
+    // Create buffers to hold the public and private keys
+    uint8_t *public_key = new uint8_t[public_key_len];
+    uint8_t *private_key = new uint8_t[private_key_len];
+
+    // Generate the key pair (public and private keys)
+    if (OQS_SIG_keypair(sig, public_key, private_key) != OQS_SUCCESS) {
+        OQS_SIG_free(sig);
+        throw std::runtime_error("Error generating the key pair for ML-DSA");
+    }
+
+    // Encode the keys in Base64 to facilitate handling
+    std::string public_key_base64 = base64_encode(public_key, public_key_len);
+    std::string private_key_base64 = base64_encode(private_key, private_key_len);
+
+    // Free the allocated memory for the keys
+    delete[] public_key;
+    delete[] private_key;
+    OQS_SIG_free(sig);
+
+    // Return the encoded keys
+    return {public_key_base64, private_key_base64};
+}
+
+// Function to sign a message using ML-DSA (from liboqs)
+std::string sign_message_with_mldsa(const std::string &message, uint8_t *private_key, size_t private_key_len, const std::string &ml_dsa_variant) {
+    // Map the variant string to the corresponding OQS_SIG algorithm
+    const char* sig_alg = nullptr;
+    if (ml_dsa_variant == "ML-DSA-44") {
+        sig_alg = OQS_SIG_alg_ml_dsa_44;
+    } else if (ml_dsa_variant == "ML-DSA-65") {
+        sig_alg = OQS_SIG_alg_ml_dsa_65;
+    } else if (ml_dsa_variant == "ML-DSA-87") {
+        sig_alg = OQS_SIG_alg_ml_dsa_87;
+    } else {
+        throw std::runtime_error("Invalid ML-DSA variant provided.");
+    }
+
+    // Initialize the signature algorithm
+    OQS_SIG *sig = OQS_SIG_new(sig_alg);
+    if (sig == nullptr) {
+        throw std::runtime_error("Error initializing the ML-DSA signature algorithm.");
+    }
+
+    // Sign the message
+    size_t signature_len = sig->length_signature;
+    uint8_t *signature = new uint8_t[signature_len];
+
+    if (OQS_SIG_sign(sig, signature, &signature_len, (uint8_t*)message.c_str(), message.size(), private_key) != OQS_SUCCESS) {
+        OQS_SIG_free(sig);
+        delete[] signature;
+        throw std::runtime_error("Signing failed.");
+    }
+
+    // Convert the signature to Base64 for easy transmission
+    std::string signature_base64 = base64_encode(signature, signature_len);
+
+    // Clean up
+    OQS_SIG_free(sig);
+    delete[] signature;
+
+    return signature_base64;
+}
+
+// Function to verify the signature using ML-DSA
+bool verify_message_with_mldsa(const std::string &message, const std::string &signature_base64, uint8_t *public_key, size_t public_key_len, const std::string &ml_dsa_variant) {
+    // Map the variant string to the corresponding OQS_SIG algorithm
+    const char* sig_alg = nullptr;
+    if (ml_dsa_variant == "ML-DSA-44") {
+        sig_alg = OQS_SIG_alg_ml_dsa_44;
+    } else if (ml_dsa_variant == "ML-DSA-65") {
+        sig_alg = OQS_SIG_alg_ml_dsa_65;
+    } else if (ml_dsa_variant == "ML-DSA-87") {
+        sig_alg = OQS_SIG_alg_ml_dsa_87;
+    } else {
+        throw std::runtime_error("Invalid ML-DSA variant provided.");
+    }
+
+    // Initialize the signature algorithm
+    OQS_SIG *sig = OQS_SIG_new(sig_alg);
+    if (sig == nullptr) {
+        throw std::runtime_error("Error initializing the ML-DSA signature algorithm.");
+    }
+
+    // Decode the signature from Base64
+    std::string decoded_signature = base64_decode(signature_base64);
+    uint8_t *signature = new uint8_t[decoded_signature.size()];
+    std::memcpy(signature, decoded_signature.data(), decoded_signature.size());
+
+    // Verify the signature
+    bool result = OQS_SIG_verify(sig, (uint8_t*)message.c_str(), message.size(), signature, decoded_signature.size(), public_key) == OQS_SUCCESS;
+
+    // Clean up
+    OQS_SIG_free(sig);
+    delete[] signature;
+
+    return result;
+}
 
 // Function to perform XOR-based encryption/decryption
 void xor_cipher(const uint8_t *key, const std::string &message, uint8_t *output) {
@@ -52,6 +162,96 @@ std::pair<uint8_t*, uint8_t*> generate_keys(const std::string &kem_name, size_t 
 
 int main() {
     crow::SimpleApp app;
+
+    // Define the route to generate ML-DSA keys
+    app.route_dynamic("/generate_ml_dsa_keys").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        // Extract the ml_dsa_variant from the request body
+        auto params = crow::json::load(req.body);
+        if (!params.has("ml_dsa_variant")) {
+            return crow::response(400, "ml_dsa_variant is required");
+        }
+
+        std::string ml_dsa_variant = params["ml_dsa_variant"].s();
+        
+        try {
+            // Generate keys using the provided variant (e.g., ML-DSA-44)
+            auto [public_key, private_key] = generate_ml_dsa_keys(ml_dsa_variant);
+
+            // Return the keys as a JSON response
+            return crow::response(crow::json::wvalue({
+                {"public_key", public_key},
+                {"private_key", private_key}
+            }));
+        } catch (const std::exception &e) {
+            // If there was an error, return a 500 status code with the error message
+            return crow::response(500, e.what());
+        }
+    });
+
+    app.route_dynamic("/sign").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+
+        if (!params.has("message") || !params.has("private_key") || !params.has("ml_dsa_variant")) {
+            return crow::response(400, "Message, private_key, and ml_dsa_variant are required");
+        }
+
+        std::string message = params["message"].s();
+        std::string private_key_base64 = params["private_key"].s();
+        std::string ml_dsa_variant = params["ml_dsa_variant"].s();
+
+        try {
+            // Decode private key from Base64
+            std::string decoded_private_key = base64_decode(private_key_base64);
+            uint8_t *private_key = new uint8_t[decoded_private_key.size()];
+            std::memcpy(private_key, decoded_private_key.data(), decoded_private_key.size());
+
+            // Sign the message
+            std::string signature_base64 = sign_message_with_mldsa(message, private_key, decoded_private_key.size(), ml_dsa_variant);
+
+            delete[] private_key;
+
+            return crow::response(crow::json::wvalue({
+                {"signature", signature_base64}
+            }));
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+
+    app.route_dynamic("/verify").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+
+        if (!params.has("message") || !params.has("signature") || !params.has("public_key") || !params.has("ml_dsa_variant")) {
+            return crow::response(400, "Message, signature, public_key, and ml_dsa_variant are required");
+        }
+
+        std::string message = params["message"].s();
+        std::string signature_base64 = params["signature"].s();
+        std::string public_key_base64 = params["public_key"].s();
+        std::string ml_dsa_variant = params["ml_dsa_variant"].s();
+
+        try {
+            // Decode public key from Base64
+            std::string decoded_public_key = base64_decode(public_key_base64);
+            uint8_t *public_key = new uint8_t[decoded_public_key.size()];
+            std::memcpy(public_key, decoded_public_key.data(), decoded_public_key.size());
+
+            // Verify the signature
+            bool verified = verify_message_with_mldsa(message, signature_base64, public_key, decoded_public_key.size(), ml_dsa_variant);
+
+            delete[] public_key;
+
+            if (verified) {
+                return crow::response(crow::json::wvalue({
+                    {"status", "verified"}
+                }));
+            } else {
+                return crow::response(400, "Signature verification failed");
+            }
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
 
     app.route_dynamic("/generate_keys").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
       auto params = crow::json::load(req.body);
