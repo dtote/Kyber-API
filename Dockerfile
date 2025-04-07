@@ -16,11 +16,15 @@ RUN apt-get update && apt-get install -y \
 # Instalar OpenSSL 1.1 (en caso de que no esté presente)
 RUN apt-get install -y openssl
 
-# Compilar el binario
-RUN make 
+# Copia el código fuente
+COPY ./src /app
+WORKDIR /app
+
+# Compilar el proyecto
+RUN make
 
 # Copiar el binario a la imagen
-COPY ./mlKemAPIDil /usr/local/bin/mlKemAPIDil
+#COPY ./mlKemAPIDil /usr/local/bin/mlKemAPIDil
 
 # Exponer el puerto en el que la API escuchará
 EXPOSE 5001
