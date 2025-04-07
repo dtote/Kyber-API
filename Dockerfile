@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Instalar OpenSSL 1.1 (en caso de que no esté presente)
 RUN apt-get install -y openssl
 
+# Compilar el binario
+RUN make 
+
 # Copiar el binario a la imagen
 COPY ./mlKemAPIDil /usr/local/bin/mlKemAPIDil
 
