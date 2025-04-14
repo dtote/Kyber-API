@@ -11,23 +11,34 @@ RUN apt-get update && apt-get install -y \
     cmake \
     libssl-dev \
     wget \
-    libboost-all-dev
+    libboost-all-dev \
+    git \
+    build-essential
 
 # Instalar OpenSSL 1.1 (en caso de que no esté presente)
 RUN apt-get install -y openssl
 
-# Copia el código fuente
-COPY ./src /app
+# Copiar el archivo .env para cargar el token de GitHub
+COPY .env /app/.env
+
+# Establecer las variables de entorno a partir del archivo .env
+RUN export $(cat /app/.env | xargs) && \
+    git clone https://$GITHUB_TOKEN@github.com/open-quantum-safe/liboqs.git /app/liboqs
+
+# Construir liboqs usando los comandos básicos
+WORKDIR /app/liboqs
+RUN git submodule update --init --recursive
+RUN mkdir build && cd build && cmake .. && make && make install
+
+# Copiar el código fuente de tu proyecto
+COPY . /app
 WORKDIR /app
 
-# Compilar el proyecto
+# Run 
 RUN make
-
-# Copiar el binario a la imagen
-#COPY ./mlKemAPIDil /usr/local/bin/mlKemAPIDil
 
 # Exponer el puerto en el que la API escuchará
 EXPOSE 5001
 
-# Ejecutar el servidor
-CMD ["/usr/local/bin/mlKemAPIDil"]
+# Ejecutar el ejecutable desde /app/mlKemAPIDil
+CMD ["/app/mlKemAPIDil"]
