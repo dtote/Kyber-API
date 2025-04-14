@@ -18,12 +18,8 @@ RUN apt-get update && apt-get install -y \
 # Instalar OpenSSL 1.1 (en caso de que no esté presente)
 RUN apt-get install -y openssl
 
-# Copiar el archivo .env para cargar el token de GitHub
-COPY .env /app/.env
-
 # Establecer las variables de entorno a partir del archivo .env
-RUN export $(cat /app/.env | xargs) && \
-    git clone https://$GITHUB_TOKEN@github.com/open-quantum-safe/liboqs.git /app/liboqs
+RUN git clone https://$GITHUB_TOKEN@github.com/open-quantum-safe/liboqs.git /app/liboqs
 
 # Construir liboqs usando los comandos básicos
 WORKDIR /app/liboqs
