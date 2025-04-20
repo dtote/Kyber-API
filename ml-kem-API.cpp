@@ -253,6 +253,28 @@ int main() {
         }
     });
 
+    app.route_dynamic("/generate_keys").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+        if (!params.has("kem_name")) {
+          return crow::response(400, "kem_name is required");
+        }
+        std::string kem_name = params["kem_name"].s();
+        size_t public_key_len, secret_key_len;
+        try {
+            auto [public_key, secret_key] = generate_keys(kem_name, public_key_len, secret_key_len);
+            std::string public_key_base64 = base64_encode(public_key, public_key_len);
+            std::string shared_secret_base64 = base64_encode(secret_key, secret_key_len);
+            delete[] public_key;
+            delete[] secret_key;
+            return crow::response(crow::json::wvalue({
+                {"public_key", public_key_base64},
+                {"secret_key", shared_secret_base64}
+            }));
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+
     app.route_dynamic("/encrypt").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
         auto params = crow::json::load(req.body);
     
