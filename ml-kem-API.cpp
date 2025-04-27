@@ -394,6 +394,220 @@ int main() {
             return crow::response(500, e.what());
         }
     });
+
+    app.route_dynamic("/bulkSign").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+        if (!params.has("messages") || !params.has("private_key") || !params.has("ml_dsa_variant")) {
+            return crow::response(400, "messages, private_key, and ml_dsa_variant are required");
+        }
+    
+        std::string private_key_base64 = params["private_key"].s();
+        std::string ml_dsa_variant = params["ml_dsa_variant"].s();
+        auto messages = params["messages"];
+    
+        try {
+            std::string decoded_private_key = base64_decode(private_key_base64);
+            uint8_t *private_key = new uint8_t[decoded_private_key.size()];
+            std::memcpy(private_key, decoded_private_key.data(), decoded_private_key.size());
+    
+            crow::json::wvalue response;
+           
+            crow::json::wvalue signatures(crow::json::wvalue::list{});
+            size_t idx = 0;
+            for (auto& msg : messages) {
+                std::string signature_base64 = sign_message_with_mldsa(msg.s(), private_key, decoded_private_key.size(), ml_dsa_variant);
+                signatures[idx++] = signature_base64;
+            }
+            response["signatures"] = std::move(signatures);
+    
+            delete[] private_key;
+    
+            return crow::response(response);
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+
+    app.route_dynamic("/bulkVerify").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+        if (!params.has("messages")) {
+            return crow::response(400, "messages field is required");
+        }
+    
+        auto messages = params["messages"];
+    
+        try {
+            crow::json::wvalue results;
+            size_t idx = 0;
+    
+            for (auto& m : messages) {
+                std::string message = m["message"].s();
+                std::string signature_base64 = m["signature"].s();
+                std::string public_key_base64 = m["public_key"].s();
+                std::string ml_dsa_variant = m["ml_dsa_variant"].s();
+    
+                std::string decoded_public_key = base64_decode(public_key_base64);
+                uint8_t *public_key = new uint8_t[decoded_public_key.size()];
+                std::memcpy(public_key, decoded_public_key.data(), decoded_public_key.size());
+    
+                bool verified = verify_message_with_mldsa(message, signature_base64, public_key, decoded_public_key.size(), ml_dsa_variant);
+    
+                delete[] public_key;
+    
+                // Guardar el resultado
+                results[idx++] = crow::json::wvalue({{"verified", verified}});
+            }
+    
+            crow::json::wvalue response;
+            response["results"] = std::move(results);
+    
+            return crow::response(response);
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+    
+    
+    app.route_dynamic("/bulkEncrypt").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+        if (!params.has("kem_name") || !params.has("messages") || !params.has("public_key")) {
+            return crow::response(400, "kem_name, messages, and public_key are required");
+        }
+    
+        std::string kem_name = params["kem_name"].s();
+        auto messages = params["messages"];
+        std::string public_key_base64 = params["public_key"].s();
+    
+        try {
+            OQS_KEM *kem = OQS_KEM_new(kem_name.c_str());
+            if (!kem) throw std::runtime_error("Failed to initialize KEM");
+    
+            std::string public_key_str = base64_decode(public_key_base64);
+            uint8_t *public_key = new uint8_t[public_key_str.size()];
+            std::memcpy(public_key, public_key_str.data(), public_key_str.size());
+    
+            crow::json::wvalue results;
+            size_t idx = 0;
+    
+            for (auto& msg : messages) {
+                size_t ciphertext_len = kem->length_ciphertext;
+                size_t shared_secret_len = kem->length_shared_secret;
+                uint8_t *ciphertext = new uint8_t[ciphertext_len];
+                uint8_t *shared_secret = new uint8_t[shared_secret_len];
+    
+                if (!encrypt_message_with_mlkem(kem_name, msg.s(), public_key, ciphertext, shared_secret)) {
+                    delete[] ciphertext;
+                    delete[] shared_secret;
+                    continue;
+                }
+    
+                std::string shared_secret_base64 = base64_encode(shared_secret, shared_secret_len);
+    
+                size_t block_size = 32;
+                std::vector<std::string> encrypted_blocks;
+                for (size_t i = 0; i < msg.s().size(); i += block_size) {
+                    std::string block = std::string(msg.s()).substr(i, block_size);
+                    uint8_t *xor_encrypted_block = new uint8_t[block.size()];
+                    xor_cipher(shared_secret, block, xor_encrypted_block);
+                    encrypted_blocks.push_back(base64_encode(xor_encrypted_block, block.size()));
+                    delete[] xor_encrypted_block;
+                }
+    
+                std::string xor_encrypted_base64 = "";
+                for (size_t i = 0; i < encrypted_blocks.size(); ++i) {
+                    xor_encrypted_base64 += encrypted_blocks[i];
+                    if (i != encrypted_blocks.size() - 1) xor_encrypted_base64 += "::";
+                }
+    
+                results[idx++] = crow::json::wvalue({
+                    {"ciphertext", xor_encrypted_base64},
+                    {"shared_secret", shared_secret_base64}
+                });
+    
+                delete[] ciphertext;
+                delete[] shared_secret;
+            }
+    
+            delete[] public_key;
+            OQS_KEM_free(kem);
+    
+            crow::json::wvalue response;
+            response["results"] = std::move(results);
+    
+            return crow::response(response);
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+    
+    app.route_dynamic("/bulkDecrypt").methods(crow::HTTPMethod::POST)([&](const crow::request &req) -> crow::response {
+        auto params = crow::json::load(req.body);
+        if (!params.has("kem_name") || !params.has("messages")) {
+            return crow::response(400, "kem_name and messages are required");
+        }
+    
+        std::string kem_name = params["kem_name"].s();
+        auto messages = params["messages"];
+    
+        try {
+            crow::json::wvalue results;
+            size_t idx = 0;
+    
+            for (auto& m : messages) {
+                std::string ciphertext_combined = m["ciphertext"].s();
+                std::string shared_secret_base64 = m["shared_secret"].s();
+    
+                try {
+                    std::string shared_secret_str = base64_decode(shared_secret_base64);
+                    uint8_t *shared_secret = new uint8_t[shared_secret_str.size()];
+                    std::memcpy(shared_secret, shared_secret_str.data(), shared_secret_str.size());
+    
+                    std::vector<std::string> encrypted_blocks;
+                    size_t pos = 0, next;
+                    while ((next = ciphertext_combined.find("::", pos)) != std::string::npos) {
+                        encrypted_blocks.push_back(ciphertext_combined.substr(pos, next - pos));
+                        pos = next + 2;
+                    }
+                    encrypted_blocks.push_back(ciphertext_combined.substr(pos));
+    
+                    std::string original_message = "";
+    
+                    for (const auto& encoded_block : encrypted_blocks) {
+                        std::string decoded = base64_decode(encoded_block);
+                        size_t block_size = decoded.size();
+                        uint8_t *xor_encrypted = new uint8_t[block_size];
+                        std::memcpy(xor_encrypted, decoded.data(), block_size);
+    
+                        uint8_t *decrypted_block = new uint8_t[block_size];
+                        xor_cipher(shared_secret, std::string((char*)xor_encrypted, block_size), decrypted_block);
+                        original_message += std::string(reinterpret_cast<char *>(decrypted_block), block_size);
+    
+                        delete[] xor_encrypted;
+                        delete[] decrypted_block;
+                    }
+    
+                    delete[] shared_secret;
+    
+                    results[idx++] = crow::json::wvalue({
+                        {"original_message", original_message}
+                    });
+    
+                } catch (...) {
+                    results[idx++] = crow::json::wvalue({
+                        {"original_message", "[error]"}
+                    });
+                }
+            }
+    
+            crow::json::wvalue response;
+            response["results"] = std::move(results);
+    
+            return crow::response(response);
+        } catch (const std::exception &e) {
+            return crow::response(500, e.what());
+        }
+    });
+        
     
 
 
