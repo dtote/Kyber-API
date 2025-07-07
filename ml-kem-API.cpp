@@ -611,7 +611,7 @@ int main() {
     
 
 
-    app.port(5001).multithreaded().run();
+    app.port(5001).run();
 
     return 0;
 }
