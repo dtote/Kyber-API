@@ -995,7 +995,7 @@ def decrypt():
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para generar las claves
-@app.route('/generate_keys', methods=['GET'])
+@app.route('/generate_keys', methods=['POST'])
 def generate_keys():
     k = 2
     n1 = 3
